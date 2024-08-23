@@ -28,12 +28,13 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('/')
             ->login()
+            ->spa()
             ->colors([
                 'primary' => Color::Blue,
                 'gray' => Color::Slate,
                 // 'primary' => '#6366f1',
             ])->spa()
-            ->brandName('Filament Demo')
+            ->brandName('Filament Admin Panel')
             ->favicon(asset('images/favicon.png'))
             // ->brandLogo(asset('images/logo.svg'))
             ->defaultThemeMode(ThemeMode::Dark)
@@ -61,6 +62,6 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-            ]);
+            ])->viteTheme('resources/css/filament/admin/theme.css');
     }
 }

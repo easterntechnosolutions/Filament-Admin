@@ -13,7 +13,8 @@ return [
     | This will allow your users to receive real-time notifications.
     |
     */
-    'spa'=>true,
+    'spa' => true,
+
     'broadcasting' => [
 
         // 'echo' => [
