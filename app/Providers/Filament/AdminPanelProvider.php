@@ -30,9 +30,9 @@ class AdminPanelProvider extends PanelProvider
             ->login()
             ->colors([
                 'primary' => Color::Blue,
-                'gray' => Color::Slate
+                'gray' => Color::Slate,
                 // 'primary' => '#6366f1',
-            ])
+            ])->spa()
             ->brandName('Filament Demo')
             ->favicon(asset('images/favicon.png'))
             // ->brandLogo(asset('images/logo.svg'))

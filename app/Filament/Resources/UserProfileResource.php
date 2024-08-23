@@ -10,12 +10,17 @@ use App\Models\User;
 use App\Models\UserProfile;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\MarkdownEditor;
 use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
 class UserProfileResource extends Resource
@@ -23,6 +28,7 @@ class UserProfileResource extends Resource
     protected static ?string $model = UserProfile::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-group';
+
     protected static ?int $navigationSort = 4;
 
     public static function form(Form $form): Form
@@ -32,6 +38,7 @@ class UserProfileResource extends Resource
                 Select::make('user_id')
                     ->label('User')
                     ->options(User::all()->pluck('name', 'id'))
+                    ->searchable()
                     ->nullable()
                     ->required(),
 
@@ -40,6 +47,7 @@ class UserProfileResource extends Resource
                     ->options(Country::all()->pluck('name', 'id'))
                     ->reactive()
                     ->afterStateUpdated(fn (callable $set) => $set('state_id', null))
+                    ->searchable()
                     ->required(),
 
                 Select::make('state_id')
@@ -54,6 +62,7 @@ class UserProfileResource extends Resource
                     })
                     ->reactive()
                     ->required()
+                    ->searchable()
                     ->afterStateUpdated(fn (callable $set) => $set('city_id', null))
                     ->disabled(fn (callable $get) => ! $get('country_id')),
 
@@ -68,6 +77,8 @@ class UserProfileResource extends Resource
                         return City::where('state_id', $stateId)->pluck('name', 'id');
                     })
                     ->required()
+
+                    ->searchable()
                     ->disabled(fn (callable $get) => ! $get('state_id')),
 
                 FileUpload::make('profile_picture')
@@ -76,17 +87,21 @@ class UserProfileResource extends Resource
                     ->directory('profile-pictures')
                     ->disk('public'),
 
-                Textarea::make('bio')
-                    ->label('Bio')
-                    ->rows(3)
-                    ->nullable(),
-
                 Radio::make('gender')
                     ->options([
                         'male' => 'Male',
                         'female' => 'Female',
                     ])
                     ->label('Gender')
+                    ->nullable(),
+
+                    RichEditor::make('bio')
+                    // MarkdownEditor::make('bio')
+                    ->label('Bio')
+                    ->nullable(),
+
+                    MarkdownEditor::make('bio')
+                    ->label('Bio')
                     ->nullable(),
 
                 CheckboxList::make('hobbies')
@@ -110,8 +125,7 @@ class UserProfileResource extends Resource
 
                 Tables\Columns\TextColumn::make('user.name')
                     ->label(ucfirst('User'))
-                    ->sortable()
-                    ->searchable(),
+                    ->sortable(),
 
                 Tables\Columns\ImageColumn::make('profile_picture_url')
                     ->label('Profile Picture')
@@ -119,36 +133,39 @@ class UserProfileResource extends Resource
 
                 Tables\Columns\TextColumn::make('country.name')
                     ->label('Country')
-                    ->sortable()
-                    ->searchable(),
+                    ->sortable(),
 
                 Tables\Columns\TextColumn::make('state.name')
                     ->label(ucfirst('State'))
-                    ->sortable()
-                    ->searchable(),
+                    ->sortable(),
 
                 Tables\Columns\TextColumn::make('city.name')
                     ->label('City')
-                    ->sortable()
-                    ->searchable(),
+                    ->sortable(),
 
                 Tables\Columns\TextColumn::make('gender')
                     ->label(ucfirst('Gender'))
-                    ->sortable()
-                    ->searchable(),
-
-                Tables\Columns\TextColumn::make('hobbies')
-                    ->label(ucfirst('Hobbies'))
-                    ->toggleable(isToggledHiddenByDefault: true),
-
-                Tables\Columns\TextColumn::make('bio')
-                    ->label(ucfirst('Bio'))
-                    ->toggleable(isToggledHiddenByDefault: true)
-                    ->limit(50),
+                    ->sortable(),
             ])
             ->filters([
-                // Add any filters here if required
+                SelectFilter::make('user_id')
+                    ->label('User Name')
+                    ->relationship('user', 'name')->searchable(),
+
+                SelectFilter::make('country_id')
+                    ->label('Country')
+                    ->relationship('country', 'name')
+                    ->searchable(),
+
+                SelectFilter::make('gender')
+                    ->label('Gender')
+                    ->options([
+                        'male' => 'Male',
+                        'female' => 'Female',
+                        'other' => 'Other',
+                    ]),
             ])
+            ->filtersLayout(FiltersLayout::AboveContentCollapsible)
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),

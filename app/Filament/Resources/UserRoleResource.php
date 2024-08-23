@@ -16,6 +16,8 @@ class UserRoleResource extends Resource
 {
     protected static ?string $model = UserRole::class;
 
+    protected static ?string $navigationLabel = 'Assign User Roles';
+
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function form(Form $form): Form
@@ -25,10 +27,12 @@ class UserRoleResource extends Resource
                 Forms\Components\Select::make('user_id')
                     ->label('Select User')
                     ->options(User::pluck('name', 'id')->toArray())
+                    ->searchable()
                     ->required(),
                 Forms\Components\Select::make('role_id')
                     ->label('Assign Role')
                     ->options(Role::pluck('role', 'id')->toArray())
+                    ->searchable()
                     ->required(),
             ]);
     }
